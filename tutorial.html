@@ -4,6 +4,19 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <title>ToDo App in Backbone.js</title>
+  <style type="text/css">
+
+    #todo-list input.edit {
+      display: none;
+    }
+    #todo-list .editing label {
+      display: none;
+    }
+    #todo-list .editing input.edit {
+      display: inline;
+    }
+
+  </style>
 </head>
 
 <body>
@@ -22,6 +35,7 @@
     <div class="view">
       <input type="checkbox" class="toggle">
       <label><%- title %></label>
+      <input value="<%- title %>" class="edit">
     </div>
   </script>
 
@@ -53,7 +67,32 @@
     template: _.template($("#item-template").html()),
     render: function() {
       this.$el.html(this.template(this.model.toJSON()));
+      this.input = this.$(".edit");
       return this;
+    },
+    initialize: function() {
+      this.model.on("change", this.render, this);
+    },
+    events: {
+      "dblclick label": "edit",
+      "keypress .edit": "updateOnEnter",
+      "blur .edit": "close"
+    },
+    edit: function() {
+      this.$el.addClass("editing");
+      this.input.focus();
+    },
+    updateOnEnter: function(e) {
+      if (e.which == 13) {
+        this.close();
+      }
+    },
+    close: function() {
+      var value = this.input.val().trim();
+      if (value) {
+        this.model.save({title: value});
+      }
+      this.$el.removeClass("editing");
     }
   });
 
