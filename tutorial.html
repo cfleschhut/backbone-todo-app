@@ -4,19 +4,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <title>ToDo App in Backbone.js</title>
-  <style type="text/css">
-
-    #todo-list input.edit {
-      display: none;
-    }
-    #todo-list .editing label {
-      display: none;
-    }
-    #todo-list .editing input.edit {
-      display: inline;
-    }
-
-  </style>
+  <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
 
 <body>
@@ -27,7 +15,8 @@
       <input id="new-todo" placeholder="What needs to be done?">
     </header>
     <section id="main">
-      <ul id="todo-list"></ul>
+      <ul id="todo-list">
+      </ul>
     </section>
   </section>
 
@@ -39,107 +28,11 @@
     </div>
   </script>
 
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-  <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.3.3/underscore-min.js"></script>
-  <script src="http://cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.2/backbone-min.js"></script>
-  <script src="http://cdnjs.cloudflare.com/ajax/libs/backbone-localstorage.js/1.0/backbone.localStorage-min.js"></script>
-
-  <script type="text/javascript">
-
-  var app = {};
-
-  app.Todo = Backbone.Model.extend({
-    defaults: {
-      title: '',
-      completed: false
-    },
-    toggle: function() {
-      this.save({completed: !this.get("completed")});
-    }
-  });
-
-  app.TodoList = Backbone.Collection.extend({
-    model: app.Todo,
-    localStorage: new Store("backbone-todo")
-  });
-
-  app.todoList = new app.TodoList();
-
-  app.TodoView = Backbone.View.extend({
-    tagName: "li",
-    template: _.template($("#item-template").html()),
-    render: function() {
-      this.$el.html(this.template(this.model.toJSON()));
-      this.input = this.$(".edit");
-      return this;
-    },
-    initialize: function() {
-      this.model.on("change", this.render, this);
-    },
-    events: {
-      "dblclick label": "edit",
-      "keypress .edit": "updateOnEnter",
-      "blur .edit": "close",
-      "click .toggle": "toggleCompleted"
-    },
-    edit: function() {
-      this.$el.addClass("editing");
-      this.input.focus();
-    },
-    updateOnEnter: function(e) {
-      if (e.which == 13) {
-        this.close();
-      }
-    },
-    close: function() {
-      var value = this.input.val().trim();
-      if (value) {
-        this.model.save({title: value});
-      }
-      this.$el.removeClass("editing");
-    },
-    toggleCompleted: function() {
-      this.model.toggle();
-    }
-  });
-
-  app.AppView = Backbone.View.extend({
-    el: "#todo-app",
-    initialize: function() {
-      this.input = this.$("#new-todo");
-      app.todoList.on("add", this.addOne, this);
-      app.todoList.on("reset", this.addAll, this);
-      app.todoList.fetch();
-    },
-    events: {
-      "keypress #new-todo": "createTodoOnEnter"
-    },
-    createTodoOnEnter: function(e) {
-      if (e.which != 13 || !this.input.val().trim()) {
-        return;
-      }
-      app.todoList.create(this.newAttributes());
-      this.input.val("");
-    },
-    addOne: function(todo) {
-      var view = new app.TodoView({model: todo});
-      $("#todo-list").append(view.render().el);
-    },
-    addAll: function() {
-      this.$("#todo-list").html();
-      app.todoList.each(this.addOne, this);
-    },
-    newAttributes: function() {
-      return {
-        title: this.input.val().trim(),
-        completed: false
-      }
-    }
-  });
-
-  app.appView = new app.AppView();
-
-  </script>
+  <script src="js/jquery.js"></script>
+  <script src="js/underscore.js"></script>
+  <script src="js/backbone.js"></script>
+  <script src="js/backbone.localStorage.js"></script>
+  <script src="js/app.js"></script>
 
 </body>
 </html>
