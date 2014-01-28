@@ -14,7 +14,15 @@ app.Todo = Backbone.Model.extend({
 // Collection
 app.TodoList = Backbone.Collection.extend({
   model: app.Todo,
-  localStorage: new Store("backbone-todo")
+  localStorage: new Store("backbone-todo"),
+  completed: function() {
+    return this.filter(function(todo) {
+      return todo.get('completed');
+    });
+  },
+  remaining: function() {
+    return this.without.apply(this, this.completed());
+  }
 });
 
 app.todoList = new app.TodoList();
@@ -86,8 +94,18 @@ app.AppView = Backbone.View.extend({
     $("#todo-list").append(view.render().el);
   },
   addAll: function() {
-    this.$("#todo-list").html();
-    app.todoList.each(this.addOne, this);
+    this.$("#todo-list").html('');
+    switch(window.filter) {
+      case 'pending':
+        _.each(app.todoList.remaining(), this.addOne);
+        break;
+      case 'completed':
+        _.each(app.todoList.completed(), this.addOne);
+        break;
+      default:
+        app.todoList.each(this.addOne, this);
+        break;
+    }
   },
   newAttributes: function() {
     return {
@@ -96,5 +114,22 @@ app.AppView = Backbone.View.extend({
     }
   }
 });
+
+// Routes
+app.Router = Backbone.Router.extend({
+  routes: {
+    '': 'index',
+    '*filter': 'setFilter'
+  },
+  index: function() {
+  },
+  setFilter: function(params) {
+    window.filter = params.trim() || '';
+    app.todoList.trigger('reset');
+  }
+});
+
+app.router = new app.Router();
+Backbone.history.start();
 
 app.appView = new app.AppView();
